@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LI Feed Curator - Debug Viewer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #0077b5;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background: #0077b5;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #005582;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .stats {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0077b5;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .filters {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        select, input {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input[type="text"] {
+            min-width: 200px;
+        }
+
+        .log-container {
+            max-height: 800px;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .log-entry {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .score {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .score.excellent { background: #d4edda; color: #155724; }
+        .score.good { background: #d1ecf1; color: #0c5460; }
+        .score.average { background: #fff3cd; color: #856404; }
+        .score.poor { background: #f8d7da; color: #721c24; }
+        .score.terrible { background: #f5c6cb; color: #721c24; }
+
+        .author-info {
+            font-weight: 500;
+            color: #0077b5;
+            margin-bottom: 8px;
+        }
+
+        .content {
+            margin-bottom: 10px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .engagement {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .engagement-item {
+            font-size: 12px;
+            color: #666;
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .reasoning {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #555;
+            border-left: 3px solid #0077b5;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .controls, .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                justify-content: space-between;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .engagement {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LI Feed Curator - Debug Viewer</h1>
+            <p>Review AI analysis decisions and post ratings</p>
+        </div>
+
+        <div class="controls">
+            <button id="refreshBtn" class="btn btn-primary">🔄 Refresh Data</button>
+            <button id="downloadBtn" class="btn btn-secondary">📥 Download Logs</button>
+            <button id="clearBtn" class="btn btn-danger">🗑️ Clear Logs</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <span id="totalEntries" class="stat-value">0</span>
+                <div class="stat-label">Total Analyzed Posts</div>
+            </div>
+            <div class="stat-item">
+                <span id="avgScore" class="stat-value">0</span>
+                <div class="stat-label">Average Score</div>
+            </div>
+            <div class="stat-item">
+                <span id="hiddenCount" class="stat-value">0</span>
+                <div class="stat-label">Hidden Posts</div>
+            </div>
+            <div class="stat-item">
+                <span id="adsCount" class="stat-value">0</span>
+                <div class="stat-label">Ads/Self-Promotional</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="scoreFilter">Filter by Score:</label>
+                <select id="scoreFilter">
+                    <option value="all">All Scores</option>
+                    <option value="excellent">Excellent (40-50)</option>
+                    <option value="good">Good (30-39)</option>
+                    <option value="average">Average (20-29)</option>
+                    <option value="poor">Poor (10-19)</option>
+                    <option value="terrible">Terrible (1-9)</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="searchInput">Search:</label>
+                <input type="text" id="searchInput" placeholder="Search content, author, or reasoning...">
+            </div>
+        </div>
+
+        <div id="logContainer" class="log-container">
+            <div class="empty-state">
+                <p>No debug data available. Start browsing LinkedIn to see AI analysis results.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="debug-viewer.js"></script>
+</body>
+</html> 

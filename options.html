@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkedIn Feed Curator - Settings</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: #f8f9fa;
+      color: #333;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #0073b1;
+      margin-bottom: 10px;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+
+    .setting-group {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .setting-group:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    input[type="text"]:focus, input[type="password"]:focus {
+      outline: none;
+      border-color: #0073b1;
+      box-shadow: 0 0 0 3px rgba(0, 115, 177, 0.1);
+    }
+
+    textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 100px;
+      font-family: inherit;
+      transition: border-color 0.2s ease;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    .help-text {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .toggle {
+      position: relative;
+      width: 50px;
+      height: 26px;
+      background: #ccc;
+      border-radius: 13px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .toggle.active {
+      background: #0073b1;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 22px;
+      height: 22px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle.active .toggle-slider {
+      transform: translateX(24px);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #0073b1;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #005885;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #f8f9fa;
+      color: #666;
+      border: 2px solid #ddd;
+    }
+
+    .btn-secondary:hover {
+      background: #e9ecef;
+    }
+
+    .status-message {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-top: 15px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .status-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .api-key-section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .threshold-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .threshold-slider {
+      flex: 1;
+      margin: 0 10px;
+    }
+
+    .threshold-value {
+      background: #0073b1;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      min-width: 30px;
+      text-align: center;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+      margin: 8px 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 24px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: #007bff;
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(26px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>LinkedIn Feed Curator</h1>
+    <p class="subtitle">Configure your AI-powered feed filtering settings</p>
+
+    <div class="setting-group">
+      <div class="toggle-container">
+        <div class="toggle" id="enableToggle">
+          <div class="toggle-slider"></div>
+        </div>
+        <label for="enableToggle">Enable feed filtering</label>
+      </div>
+      <div class="help-text">Turn the extension on or off. When disabled, all posts will be shown.</div>
+    </div>
+
+    <div class="setting-group">
+      <div class="api-key-section">
+        <label for="apiKey">Anthropic API Key</label>
+        <input type="password" id="apiKey" placeholder="Enter your Anthropic API key">
+        <div class="help-text">
+          Get your API key from <a href="https://console.anthropic.com/" target="_blank">Anthropic Console</a>. 
+          This is required for AI analysis of posts. Your key is stored securely in your browser.
+        </div>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <label for="threshold">Quality Threshold: <span id="threshold-value">25</span></label>
+      <input type="range" id="threshold" min="1" max="50" value="25" class="slider">
+      <small class="help-text">Posts scoring below this threshold will be hidden. Higher threshold = more posts hidden.</small>
+    </div>
+
+    <div class="setting-group">
+      <label for="autoScroll">Auto-Scroll Feed</label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="autoScroll">
+        <span class="toggle-slider"></span>
+      </label>
+      <small class="help-text">Automatically scroll through the LinkedIn feed to process more posts. The extension will gradually scroll down every few seconds to load new content.</small>
+    </div>
+
+    <div class="setting-group">
+      <label for="customFiltering">Custom Filtering Preferences (Optional)</label>
+      <textarea id="customFiltering" placeholder="Example: Show me posts about AI companies, machine learning products, startup funding news, and software engineering careers. Avoid personal stories, food photos, and motivational quotes." rows="4"></textarea>
+      <small class="help-text">Describe the types of content you want to see or avoid. Be specific! Examples: 'AI companies and tech startups', 'Marketing tips and growth strategies', 'Finance and investment advice'.</small>
+    </div>
+
+    <div class="setting-group">
+      <h3>📄 Export Filtered Posts</h3>
+      <p class="help-text">Download a markdown report of all posts that passed your quality filter:</p>
+      <button class="btn-secondary" id="exportMarkdownBtn">📄 Download Markdown Report</button>
+      <div id="exportStatus" class="help-text" style="margin-top: 10px; display: none;"></div>
+    </div>
+
+    <div class="button-group">
+      <button class="btn-primary" id="saveBtn">Save Settings</button>
+      <button class="btn-secondary" id="testBtn">Test API Connection</button>
+    </div>
+
+    <div id="statusMessage"></div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html> 

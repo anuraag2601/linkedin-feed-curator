@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkedIn Feed Curator</title>
+  <style>
+    body {
+      width: 320px;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0077b5, #00a0dc);
+      color: white;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .header p {
+      margin: 5px 0 0 0;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .toggle-container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+      margin: 10px 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.3);
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #4CAF50;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .threshold-container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .threshold-label {
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .threshold-input {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .stats {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .stat-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-direction: column;
+    }
+
+    .btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      text-align: center;
+      transition: background-color 0.2s;
+    }
+
+    .btn-primary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .status {
+      text-align: center;
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🧠 LI Feed Curator</h1>
+      <p>AI-powered LinkedIn post filtering</p>
+    </div>
+
+    <div class="toggle-container">
+      <div>Extension Status</div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="enableToggle">
+        <span class="slider"></span>
+      </label>
+      <div id="statusText">Loading...</div>
+    </div>
+
+    <div class="threshold-container">
+      <label class="threshold-label" for="thresholdInput">
+        Quality Threshold: <span id="thresholdValue">25</span>/50
+      </label>
+      <input type="range" id="thresholdInput" class="threshold-input" 
+             min="1" max="50" value="25" step="1">
+      <small>Posts below this score will be hidden</small>
+    </div>
+
+    <div class="toggle-container">
+      <div>Auto-Scroll Feed</div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="autoScrollToggle">
+        <span class="slider"></span>
+      </label>
+      <div id="autoScrollText">Disabled</div>
+      <small style="font-size: 11px; opacity: 0.8;">Automatically process more posts</small>
+    </div>
+
+    <div class="stats">
+      <div class="stat-item">
+        <span>Posts Hidden Today:</span>
+        <span id="hiddenToday">0</span>
+      </div>
+      <div class="stat-item">
+        <span>Total Processed:</span>
+        <span id="totalProcessed">0</span>
+      </div>
+      <div class="stat-item">
+        <span>Current Threshold:</span>
+        <span id="currentThreshold">25</span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="optionsBtn" class="btn btn-primary">⚙️ Options</button>
+      <button id="exportBtn" class="btn btn-secondary">📄 Export Report</button>
+      <button id="debugBtn" class="btn btn-secondary">🔍 Debug Viewer</button>
+    </div>
+
+    <div class="status" id="apiStatus">
+      Ready to filter your LinkedIn feed
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html> 
