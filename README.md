@@ -1,263 +1,314 @@
 # LinkedIn Feed Curator
 
-An AI-powered Chrome extension that filters LinkedIn feed posts based on quality, helping you focus on high-value content with advanced features for scoring, auto-scrolling, and content export.
+An AI-powered Chrome extension that filters LinkedIn feed posts based on quality, helping you focus on high-value content with advanced features for scoring, auto-scrolling, content export, and **AI-generated audio summaries**.
 
-## 🚀 Features
+## 🚀 Key Features
 
-- **AI-Powered Analysis**: Uses Anthropic's Claude AI to analyze post quality
+### 🎧 **AI Audio Summaries (NEW)**
+- **Intelligent Audio Generation**: Generate AI-powered audio summaries of your filtered LinkedIn posts using ElevenLabs text-to-speech
+- **Persistent Audio Storage**: Save audio summaries to browser storage with automatic download
+- **Audio History Management**: View, replay, and manage previously generated summaries with date/time stamps
+- **One-Click Playback**: Play stored audio summaries directly from the popup interface
+- **Download & Delete**: Download audio files as MP3s or delete unwanted summaries
+- **Smart Duration Estimation**: Automatic calculation of summary duration based on content length
+
+### 🧠 **AI-Powered Content Analysis**
+- **Dual AI Integration**: Uses Anthropic's Claude AI for content analysis and ElevenLabs for audio generation
 - **Real-time Filtering**: Automatically hides low-quality posts as you scroll
 - **Post Score Display**: Visual indicators showing quality scores with color-coded emojis
-- **Auto-Scroll Processing**: Automatically scrolls to process more posts without manual intervention
-- **Markdown Export**: Export filtered posts to downloadable markdown files with statistics
-- **Enhanced Control Panel**: Real-time display of hidden/visible post counts with toggle controls
-- **Customizable Threshold**: Adjust filtering sensitivity (1-50 scale)
 - **Custom Filtering**: Keyword-based filtering for personalized content preferences
-- **Enhanced Popup Interface**: Quick access to all features from browser toolbar
-- **Easy Toggle**: Quick enable/disable from browser popup
-- **No Login Required**: Works immediately after installation
+
+### ⚡ **Advanced Automation**
+- **Auto-Scroll Processing**: Automatically scrolls to process more posts without manual intervention
+- **Smart Post Limiting**: Configurable limits to prevent infinite scrolling
+- **Real-Time Statistics**: Live display of hidden/visible post counts with toggle controls
+
+### 📊 **Export & Reporting**
+- **Markdown Export**: Export filtered posts to downloadable markdown files with comprehensive statistics
+- **Audio Summary Export**: Automatic download of generated audio summaries as MP3 files
+- **Session Analytics**: Detailed reports including post statistics, scores, and engagement metrics
 
 ## 📋 Prerequisites
 
-1. **Anthropic API Key**: You'll need an API key from [Anthropic Console](https://console.anthropic.com/)
-   - Sign up for an account if you don't have one
-   - Generate an API key from your dashboard
-   - Note: API usage will incur charges based on Anthropic's pricing
+### Required API Keys
+1. **Anthropic API Key**: For content analysis - Get from [Anthropic Console](https://console.anthropic.com/)
+2. **ElevenLabs API Key**: For audio summaries - Get from [ElevenLabs Platform](https://elevenlabs.io/)
 
-## 🛠 Installation
+**Cost Considerations:**
+- **Anthropic**: ~$0.0001-0.0005 per post analyzed
+- **ElevenLabs**: ~$0.0001-0.0002 per character converted to speech
+- **Typical Session**: 100-500 posts + audio summary ≈ $0.02-0.30 total
 
-### Step 1: Download the Extension
+## 🛠 Installation & Setup
+
+### Step 1: Install Extension
 1. Download or clone this repository
-2. Ensure all files are in the `LI feed curator` folder
+2. Open Chrome and go to `chrome://extensions/`
+3. Enable "Developer mode" (toggle in top-right)
+4. Click "Load unpacked" and select the `LI feed curator` folder
 
-### Step 2: Install in Chrome
-1. Open Chrome and navigate to `chrome://extensions/`
-2. Enable "Developer mode" (toggle in top-right corner)
-3. Click "Load unpacked"
-4. Select the `LI feed curator` folder
-5. The extension should now appear in your extensions list
+### Step 2: Configure API Keys
+1. Click the extension icon in your toolbar
+2. Click "⚙️ Options" to open the configuration page
+3. Enter your **Anthropic API key** for content analysis
+4. Enter your **ElevenLabs API key** for audio summaries
+5. Test both connections and save settings
 
-### Step 3: Configure API Key
-1. After installation, the options page will open automatically
-2. Enter your Anthropic API key in the designated field
-3. Click "Test API Connection" to verify it works
-4. Configure your preferences (quality threshold, auto-scroll, custom filtering)
-5. Click "Save Settings"
+### Step 3: Customize Settings
+- **Quality Threshold**: Adjust filtering sensitivity (1-50 scale)
+- **Auto-Scroll**: Enable automatic feed processing
+- **Post Limit**: Set maximum posts to process per session
+- **Custom Keywords**: Add topics you want to prioritize
 
-## 🎯 Usage
+## 🎯 Complete Usage Guide
 
-### Basic Operation
-1. **Navigate to LinkedIn**: Go to [linkedin.com](https://linkedin.com) and log in
-2. **Control Panel**: Look for the LinkedIn Feed Curator control panel in the header
-3. **Automatic Filtering**: The extension will automatically start analyzing and filtering posts
-4. **Score Indicators**: High-quality posts display score indicators with color-coded emojis:
+### Basic LinkedIn Filtering
+1. Navigate to [linkedin.com/feed](https://linkedin.com/feed)
+2. The extension automatically starts analyzing posts
+3. High-quality posts show color-coded score indicators:
    - 🔥 **Red (35-50)**: Excellent, must-read content
    - 🟡 **Yellow (25-34)**: Good content worth reading
    - ⚪ **White (15-24)**: Average content
-   - 🔵 **Blue (1-14)**: Low-quality content (typically hidden)
-5. **Hidden Post Indicators**: You'll see notifications when low-quality posts are hidden
-6. **Show Hidden Posts**: Click "Show anyway" on any hidden post indicator to reveal that specific post
+   - 🔵 **Blue (1-14)**: Low-quality (hidden by default)
 
-### New Features
+### 🎧 Audio Summary Generation
+
+#### Creating Audio Summaries
+1. **Process Posts**: Let the extension filter your LinkedIn feed (or enable auto-scroll)
+2. **Generate Audio**: Click the extension icon → "🎧 Generate Audio Summary"
+3. **Automatic Processing**: The extension will:
+   - Collect all filtered high-quality posts
+   - Generate an intelligent summary using Claude AI
+   - Convert the summary to speech using ElevenLabs
+   - Automatically download the MP3 file
+   - Save the audio to browser storage for future access
+
+#### Managing Audio History
+**Access Previous Summaries:**
+- Open the extension popup
+- Scroll to "📚 Previous Summaries" section
+- View all stored audio summaries with timestamps and metadata
+
+**Available Actions:**
+- **▶️ Play**: Stream audio directly in the popup
+- **⬇️ Download**: Re-download the MP3 file
+- **🗑️ Delete**: Remove unwanted summaries (with confirmation)
+
+**Storage Details:**
+- Stores up to 10 most recent audio summaries
+- Each summary includes: date/time, post count, estimated duration, full audio data
+- Persistent storage survives browser restarts and updates
+
+### Advanced Features
 
 #### Auto-Scroll Processing
-- **Enable Auto-Scroll**: Toggle in popup or options page
-- **Automatic Processing**: Scrolls every 3 seconds to process new posts
-- **Smart Control**: Automatically stops when it reaches the end or when disabled
-- **Manual Override**: Can be toggled on/off anytime during browsing
+- **Enable**: Toggle in popup or options page
+- **Smart Processing**: Automatically scrolls every 3 seconds
+- **Configurable Limits**: Set maximum posts to prevent endless scrolling
+- **Manual Override**: Can be toggled on/off during browsing
 
 #### Markdown Export
-- **One-Click Export**: Available in both popup and options page
-- **Comprehensive Reports**: Includes post statistics, scores, authors, and engagement metrics
+- **Comprehensive Reports**: Complete post data with scores and statistics
 - **File Format**: `linkedin-filtered-posts-[date].md`
-- **Content Included**: 
-  - Post summaries and full content
-  - Quality scores and reasoning
-  - Author information and post links
-  - Engagement statistics (likes, comments, shares)
-  - Filtering statistics and session summary
+- **Includes**: Post content, quality scores, author info, engagement metrics
 
 #### Enhanced Control Panel
-- **Real-Time Counts**: Shows hidden vs visible posts as they're processed
-- **Quick Toggles**: Auto-scroll and export buttons directly in LinkedIn interface
-- **Status Updates**: Live feedback on processing status and feature states
+- **Real-Time Stats**: Live counts of hidden vs visible posts
+- **Quick Toggles**: Enable/disable features directly on LinkedIn
+- **Status Updates**: Live feedback on processing and feature states
 
-### Settings & Controls
+## 🔧 Configuration Options
 
-#### Popup Interface
-- **Quick Controls**: Enable/disable extension, auto-scroll toggle
-- **Statistics**: View current session stats (hidden/visible posts, threshold)
-- **Export**: One-click markdown export of filtered posts
-- **Settings Access**: Direct link to full options page
-
-#### Options Page
-- **Enable/Disable**: Master toggle for the entire extension
-- **API Key Configuration**: Set and test your Anthropic API key
-- **Quality Threshold**: Adjust filtering sensitivity (1-50)
-  - Lower values = more permissive (shows more posts)
-  - Higher values = stricter filtering (hides more posts)
-  - Default: 25
-- **Auto-Scroll**: Enable automatic scrolling for continuous processing
-- **Custom Filtering**: Add keywords for content you want to prioritize
-  - Examples: "AI companies, machine learning, startup funding, tech industry news"
-  - Posts matching these keywords receive bonus points in scoring
-- **Export Options**: Generate and download markdown reports
+### Popup Interface Controls
+- **Extension Toggle**: Master on/off switch
+- **Auto-Scroll Toggle**: Enable automatic feed processing
+- **Quality Threshold**: Adjust filtering sensitivity with live preview
+- **Post Limit**: Control auto-scroll stopping point
+- **Real-Time Stats**: View current session statistics
+- **Audio Generation**: One-click summary creation
+- **Audio History**: Access to all stored summaries
+- **Export**: Instant markdown report generation
 
 ### Quality Scoring System
 
-Posts are scored 1-50 based on:
-
-- **Exceptional Content** (40-50): Unique insights, industry expertise, thought leadership
-- **High Quality** (35-39): Valuable professional content with strong engagement
-- **Good Content** (25-34): Meaningful insights worth reading
-- **Average Content** (15-24): Some value but not exceptional
-- **Low Quality** (1-14): Generic, promotional, or spam-like content
-
-**Scoring Factors:**
-- Content originality and uniqueness
-- Professional relevance and value
-- Writing quality and clarity
-- Engagement quality vs quantity
-- Actionable insights or thought-provoking ideas
-- Match with custom filtering keywords (bonus points)
+**Scoring Criteria (1-50 scale):**
+- **Content Originality**: Unique insights vs generic posts
+- **Professional Value**: Career/industry relevance
+- **Writing Quality**: Clarity, structure, engagement
+- **Thought Leadership**: Expert insights and analysis
+- **Actionable Content**: Practical value and takeaways
+- **Custom Keywords**: Bonus points for matching interests
 
 **Visual Indicators:**
-- Posts above threshold show colored score indicators
-- Posts below threshold are hidden with explanation
-- Control panel shows real-time filtering statistics
+- Color-coded emojis show quality levels
+- Hidden posts include explanation tooltips
+- Control panel displays filtering statistics
 
-## 🔧 Configuration
-
-### Default Settings
-- **Enabled**: Yes
-- **Threshold**: 25 (moderate filtering)
-- **Auto-Scroll**: Disabled
-- **Custom Filtering**: Empty (no keywords)
-- **API Key**: Not configured (requires user input)
-
-### Advanced Configuration
-- Settings sync across Chrome browsers when logged in
-- All preferences stored securely in Chrome's sync storage
-- Export preferences and filtering history available via markdown export
-
-## 🧪 Testing Guide
+## 🧪 Testing & Validation
 
 ### Quick Test Procedure
-1. **Reload Extension**: Go to `chrome://extensions/` and reload
-2. **Configure Settings**: Set threshold 25-30, enable auto-scroll, add keywords
-3. **Test on LinkedIn**: Visit `https://www.linkedin.com/feed/`
-4. **Verify Features**: Check control panel, score indicators, auto-scroll
-5. **Test Export**: Use popup or options page to export filtered posts
+1. **Setup**: Configure both API keys, set threshold to 25-30
+2. **LinkedIn Test**: Visit feed, verify posts are being scored and filtered
+3. **Auto-Scroll Test**: Enable auto-scroll, watch automatic processing
+4. **Audio Test**: Generate an audio summary, verify download and storage
+5. **History Test**: Check audio history in popup, test play/download/delete
+6. **Export Test**: Generate markdown report
 
 ### Developer Testing
-Open Chrome DevTools on LinkedIn and run:
 ```javascript
-// Test all features
-window.linkedInCurator?.exportFilteredPosts();
-console.log('Visible posts:', window.linkedInCurator?.visiblePosts?.length);
-console.log('Auto-scroll enabled:', window.linkedInCurator?.autoScrollEnabled);
+// Test extension functionality in LinkedIn console
+console.log('Extension Status:', window.linkedInCurator?.enabled);
+console.log('Visible Posts:', window.linkedInCurator?.visiblePosts?.length);
+console.log('Hidden Posts:', window.linkedInCurator?.hiddenPosts?.length);
+console.log('Auto-scroll:', window.linkedInCurator?.autoScrollEnabled);
+
+// Test audio storage
+chrome.storage.local.get(['audioSummaries'], (result) => {
+  console.log('Stored Audio Summaries:', result.audioSummaries?.length || 0);
+});
 ```
 
 ## 🚨 Troubleshooting
 
 ### Common Issues
 
-**Extension not working on LinkedIn:**
-- Ensure you're on linkedin.com (not mobile version)
-- Check that the extension is enabled in popup
-- Verify API key is configured correctly
-- Try refreshing the LinkedIn page
+**Extension Not Working:**
+- Verify you're on linkedin.com (not mobile version)
+- Check extension is enabled in popup
+- Confirm both API keys are configured and tested
+- Refresh the LinkedIn page
 
-**Auto-scroll not working:**
-- Check if auto-scroll is enabled in popup or options
-- Verify the control panel shows "Auto-scroll: ON"
-- Check console for any JavaScript errors
+**Audio Generation Issues:**
+- Ensure ElevenLabs API key is configured
+- Check you have processed posts first (see popup counter)
+- Verify API key has sufficient credits
+- Look for error messages in popup status
 
-**Scores not displaying:**
-- Ensure posts are above the quality threshold
-- Check if custom filtering keywords are too restrictive
-- Verify API key is working correctly
+**Audio History Problems:**
+- Check browser storage permissions
+- Verify audio files aren't corrupted (try re-downloading)
+- Clear storage if experiencing playback issues
 
-**Export not working:**
-- Make sure you have processed some posts first
-- Check that browser allows downloads
-- Verify there are visible posts to export
+**Performance Issues:**
+- Lower the post limit for auto-scroll
+- Increase quality threshold to filter more aggressively
+- Disable auto-scroll for manual control
 
-**API key errors:**
-- Verify your API key is correct in options page
-- Test the connection using "Test API Connection" button
-- Check your Anthropic account has available credits
-- Ensure API key has proper permissions
-
-### Debug Mode
-1. Open Chrome DevTools (F12)
-2. Go to Console tab
-3. Look for "LinkedIn Feed Curator" messages
-4. Check Network tab for API requests
-5. Any errors will be logged with detailed information
-
-## 💰 Cost Considerations
-
-- The extension uses Anthropic's Claude-3-Haiku model
-- Cost is approximately $0.0001-0.0005 per post analyzed
-- Typical usage with auto-scroll: ~100-500 posts per session = $0.01-0.25 per session
-- Export feature doesn't incur additional API costs
-- Monitor your usage in the Anthropic Console
+### Debug Information
+1. Open Chrome DevTools (F12) on LinkedIn
+2. Check Console for "LinkedIn Feed Curator" messages
+3. Monitor Network tab for API requests
+4. Review Storage tab for saved data
 
 ## 🔒 Privacy & Security
 
-- **API Key Storage**: Stored securely in Chrome's sync storage
-- **Data Processing**: Post content sent to Anthropic for analysis only
-- **No Data Collection**: Extension doesn't collect or store personal data
-- **Local Processing**: All filtering decisions made locally in your browser
-- **Export Data**: Markdown exports contain only filtered post data, stored locally
+- **API Key Storage**: Encrypted in Chrome's sync storage
+- **Data Processing**: Content sent only to configured AI services for analysis
+- **No Data Collection**: Extension doesn't collect personal information
+- **Local Storage**: Audio files and settings stored locally in browser
+- **No Tracking**: No analytics or usage tracking implemented
+
+## 💰 Detailed Cost Analysis
+
+### Anthropic (Content Analysis)
+- **Model**: Claude-3-Haiku (cost-optimized)
+- **Cost**: ~$0.25 per million tokens
+- **Usage**: ~50-200 tokens per post
+- **Estimate**: $0.0001-0.0005 per post
+
+### ElevenLabs (Audio Generation)
+- **Model**: High-quality text-to-speech
+- **Cost**: ~$0.18 per million characters
+- **Usage**: ~500-2000 characters per summary
+- **Estimate**: $0.0001-0.0004 per summary
+
+### Typical Usage Scenarios
+- **Light Use** (50 posts + 1 audio): ~$0.01-0.03 per session
+- **Heavy Use** (500 posts + 1 audio): ~$0.10-0.30 per session
+- **Daily Usage** (200 posts + audio): ~$1-3 per month
 
 ## 🤝 Contributing
 
-Feel free to submit issues, feature requests, or pull requests to improve the extension.
+We welcome contributions! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Test thoroughly using the provided test procedures
+4. Submit a pull request with detailed description
 
 ### Development Setup
-1. Clone the repository
-2. Load the extension in Chrome developer mode
-3. Make changes and test thoroughly
-4. Follow the testing guide for validation
+```bash
+git clone [repository-url]
+cd "LI feed curator"
+# Load in Chrome developer mode
+# Make changes and test
+```
+
+## 🔄 Version History
+
+### v2.0 (Current) - Audio Summaries Update
+#### New Features
+- **🎧 AI Audio Summaries**: Complete integration with ElevenLabs for text-to-speech conversion
+- **📚 Audio History Management**: Persistent storage and playback of generated summaries
+- **⬇️ Audio Download System**: Automatic MP3 downloads with smart file naming
+- **🗑️ Audio Cleanup Tools**: Delete unwanted summaries with confirmation prompts
+- **⏱️ Duration Estimation**: Smart calculation of audio summary lengths
+
+#### Technical Improvements
+- Enhanced storage management with 10-summary limit
+- Improved error handling for audio generation failures
+- Better UI feedback during audio processing
+- Optimized base64 audio storage and blob conversion
+- Comprehensive audio history interface
+
+### v1.1 - Enhanced Filtering
+- Post score display with visual indicators
+- Auto-scroll processing capabilities
+- Markdown export functionality
+- Enhanced popup interface
+- Custom filtering with keywords
+- Real-time statistics and controls
+
+### v1.0 - Initial Release
+- Basic AI-powered content filtering
+- Quality threshold controls
+- LinkedIn integration
+- Chrome extension framework
+
+## 🚀 Roadmap
+
+### Upcoming Features
+- **Multiple Voice Options**: Choose from different ElevenLabs voices
+- **Summary Customization**: Control audio summary length and style
+- **Playlist Creation**: Combine multiple summaries into playlists
+- **Background Playback**: Continue audio while browsing other tabs
+- **Export Integration**: Include audio links in markdown exports
+- **Advanced Analytics**: Track listening patterns and preferences
+
+### Technical Enhancements
+- **Offline Audio Storage**: Local file system integration
+- **Compression Options**: Reduce storage usage for audio files
+- **Sync Across Devices**: Cloud synchronization of audio history
+- **Mobile Support**: Audio summaries for mobile LinkedIn browsing
 
 ## 📄 License
 
-This project is open source. Check the license file for details.
+This project is open source under the MIT License. See LICENSE file for details.
 
 ## 🆘 Support
 
-If you encounter issues:
-1. Check this README first
-2. Look at the troubleshooting section
-3. Test using the provided JavaScript commands
-4. Check browser console for errors
-5. Open an issue with detailed information about the problem
+For issues and support:
+1. Check this comprehensive README
+2. Review the troubleshooting section
+3. Test using provided JavaScript commands
+4. Examine browser console for errors
+5. Open a GitHub issue with detailed problem description
 
-## 🔄 Recent Updates (v1.1)
+**When reporting audio issues, please include:**
+- Browser version and operating system
+- Error messages from popup or console
+- Steps to reproduce the problem
+- API key configuration status (without sharing actual keys)
 
-### New Features Added
-- **Post Score Display**: Visual quality indicators on all visible posts
-- **Auto-Scroll Processing**: Automatic scrolling for hands-free browsing
-- **Markdown Export**: Comprehensive post export with statistics and metadata
-- **Enhanced UI**: Improved popup interface and LinkedIn control panel
-- **Custom Filtering**: Keyword-based content prioritization
-- **Real-Time Statistics**: Live counts and status updates
+---
 
-### Technical Improvements
-- Better error handling and API connection testing
-- Improved message passing between components
-- Enhanced post processing and quality analysis
-- Optimized performance for large feed processing
-- Comprehensive logging and debugging capabilities
-
-## 🚀 Future Enhancements
-
-Planned improvements for future versions:
-- Advanced filtering rules and conditions
-- Multiple AI model support (OpenAI, local models)
-- Content categorization and tagging
-- Analytics dashboard with usage insights
-- Bulk operations and batch processing
-- Integration with productivity tools
-- Mobile app companion 
+Transform your LinkedIn experience with AI-powered filtering and audio summaries! 🚀🎧 
