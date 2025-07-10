@@ -14,11 +14,15 @@ class OptionsManager {
     this.thresholdSlider = document.getElementById('threshold');
     this.thresholdValue = document.getElementById('threshold-value');
     this.autoScrollToggle = document.getElementById('autoScroll');
+    this.postLimitSlider = document.getElementById('postLimit');
+    this.postLimitValue = document.getElementById('post-limit-value');
     this.customFilteringInput = document.getElementById('customFiltering');
     this.apiKeyInput = document.getElementById('apiKey');
+    this.elevenLabsApiKeyInput = document.getElementById('elevenLabsApiKey');
     this.saveButton = document.getElementById('saveBtn');
     this.testButton = document.getElementById('testBtn');
     this.exportMarkdownBtn = document.getElementById('exportMarkdownBtn');
+    this.debugBtn = document.getElementById('debugBtn');
     this.exportStatus = document.getElementById('exportStatus');
     this.statusDiv = document.getElementById('statusMessage');
   }
@@ -28,11 +32,13 @@ class OptionsManager {
     this.enableToggle.addEventListener('click', () => this.toggleEnable());
     
     this.thresholdSlider.addEventListener('input', () => this.updateThresholdDisplay());
+    this.postLimitSlider.addEventListener('input', () => this.updatePostLimitDisplay());
     this.autoScrollToggle.addEventListener('change', () => this.saveSettings());
     this.customFilteringInput.addEventListener('input', () => this.saveSettings());
     this.saveButton.addEventListener('click', () => this.saveSettings());
     this.testButton.addEventListener('click', () => this.testApiConnection());
     this.exportMarkdownBtn.addEventListener('click', () => this.exportMarkdown());
+    this.debugBtn.addEventListener('click', () => this.openDebugViewer());
   }
 
   async loadSettings() {
@@ -41,8 +47,10 @@ class OptionsManager {
         'enabled', 
         'threshold', 
         'autoScroll',
+        'postLimit',
         'customFiltering', 
-        'apiKey'
+        'apiKey',
+        'elevenLabsApiKey'
       ]);
       
       // Set enable toggle state
@@ -50,11 +58,14 @@ class OptionsManager {
       this.setEnableToggle(isEnabled);
       
       this.thresholdSlider.value = result.threshold || 25;
+      this.postLimitSlider.value = result.postLimit || 50;
       this.autoScrollToggle.checked = result.autoScroll || false;
       this.customFilteringInput.value = result.customFiltering || '';
       this.apiKeyInput.value = result.apiKey || '';
+      this.elevenLabsApiKeyInput.value = result.elevenLabsApiKey || '';
       
       this.updateThresholdDisplay();
+      this.updatePostLimitDisplay();
     } catch (error) {
       console.error('Error loading settings:', error);
     }
@@ -80,14 +91,21 @@ class OptionsManager {
     this.saveSettings();
   }
 
+  updatePostLimitDisplay() {
+    this.postLimitValue.textContent = this.postLimitSlider.value;
+    this.saveSettings();
+  }
+
   async saveSettings() {
     try {
       const settings = {
         enabled: this.enabledState !== false,
         threshold: parseInt(this.thresholdSlider.value),
+        postLimit: parseInt(this.postLimitSlider.value),
         autoScroll: this.autoScrollToggle.checked,
         customFiltering: this.customFilteringInput.value.trim(),
-        apiKey: this.apiKeyInput.value.trim()
+        apiKey: this.apiKeyInput.value.trim(),
+        elevenLabsApiKey: this.elevenLabsApiKeyInput.value.trim()
       };
 
       await chrome.storage.sync.set(settings);
@@ -132,6 +150,12 @@ class OptionsManager {
       this.testButton.disabled = false;
       this.testButton.textContent = 'Test API Connection';
     }
+  }
+
+  openDebugViewer() {
+    chrome.tabs.create({
+      url: chrome.runtime.getURL('debug-viewer.html')
+    });
   }
 
   showStatus(message, type) {

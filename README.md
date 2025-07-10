@@ -1,6 +1,6 @@
 # LinkedIn Feed Curator
 
-An AI-powered Chrome extension that filters LinkedIn feed posts based on quality, helping you focus on high-value content with advanced features for scoring, auto-scrolling, content export, and **AI-generated audio summaries**.
+An AI-powered Chrome extension that filters LinkedIn feed posts based on quality, helping you focus on high-value content with advanced features for scoring, auto-scrolling, content export, **AI-generated audio summaries**, and **smart audio notifications**.
 
 ## 🚀 Key Features
 
@@ -12,6 +12,13 @@ An AI-powered Chrome extension that filters LinkedIn feed posts based on quality
 - **Download & Delete**: Download audio files as MP3s or delete unwanted summaries
 - **Smart Duration Estimation**: Automatic calculation of summary duration based on content length
 
+### 🔔 **Smart Audio Notifications (NEW)**
+- **Auto-Scroll Completion Alerts**: Gentle audio notification when target post limit is reached
+- **Pleasant 3-Tone Sequence**: Soft major chord (C5-E5-G5) notification using Web Audio API
+- **User-Controllable**: Enable/disable audio notifications in extension settings
+- **Non-Intrusive**: Subtle volume levels designed not to disturb your workflow
+- **Graceful Fallback**: Works even if Web Audio API features aren't fully supported
+
 ### 🧠 **AI-Powered Content Analysis**
 - **Dual AI Integration**: Uses Anthropic's Claude AI for content analysis and ElevenLabs for audio generation
 - **Real-time Filtering**: Automatically hides low-quality posts as you scroll
@@ -20,7 +27,7 @@ An AI-powered Chrome extension that filters LinkedIn feed posts based on quality
 
 ### ⚡ **Advanced Automation**
 - **Auto-Scroll Processing**: Automatically scrolls to process more posts without manual intervention
-- **Smart Post Limiting**: Configurable limits to prevent infinite scrolling
+- **Smart Post Limiting**: Configurable limits to prevent infinite scrolling with audio completion alerts
 - **Real-Time Statistics**: Live display of hidden/visible post counts with toggle controls
 
 ### 📊 **Export & Reporting**
@@ -58,6 +65,7 @@ An AI-powered Chrome extension that filters LinkedIn feed posts based on quality
 - **Quality Threshold**: Adjust filtering sensitivity (1-50 scale)
 - **Auto-Scroll**: Enable automatic feed processing
 - **Post Limit**: Set maximum posts to process per session
+- **Audio Notifications**: Enable/disable completion sound alerts
 - **Custom Keywords**: Add topics you want to prioritize
 
 ## 🎯 Complete Usage Guide
@@ -105,7 +113,15 @@ An AI-powered Chrome extension that filters LinkedIn feed posts based on quality
 - **Enable**: Toggle in popup or options page
 - **Smart Processing**: Automatically scrolls every 3 seconds
 - **Configurable Limits**: Set maximum posts to prevent endless scrolling
+- **Audio Completion**: Gentle 3-tone notification when target is reached
 - **Manual Override**: Can be toggled on/off during browsing
+
+#### Audio Notifications
+- **Completion Alerts**: Soft musical notification (C5-E5-G5 major chord) when auto-scroll reaches post limit
+- **User Control**: Enable/disable in popup or options page (enabled by default)
+- **Technical Details**: Uses Web Audio API for browser-native sound generation
+- **Fallback Support**: Simple beep fallback for limited browser support
+- **Volume**: Designed to be subtle and non-intrusive (max 0.08 volume)
 
 #### Markdown Export
 - **Comprehensive Reports**: Complete post data with scores and statistics
@@ -123,7 +139,8 @@ An AI-powered Chrome extension that filters LinkedIn feed posts based on quality
 - **Extension Toggle**: Master on/off switch
 - **Auto-Scroll Toggle**: Enable automatic feed processing
 - **Quality Threshold**: Adjust filtering sensitivity with live preview
-- **Post Limit**: Control auto-scroll stopping point
+- **Post Limit**: Control auto-scroll stopping point with audio notifications
+- **Audio Notifications**: Toggle completion sound alerts on/off
 - **Real-Time Stats**: View current session statistics
 - **Audio Generation**: One-click summary creation
 - **Audio History**: Access to all stored summaries
@@ -188,6 +205,12 @@ chrome.storage.local.get(['audioSummaries'], (result) => {
 - Check browser storage permissions
 - Verify audio files aren't corrupted (try re-downloading)
 - Clear storage if experiencing playback issues
+
+**Audio Notification Issues:**
+- Ensure browser allows audio playback (some browsers block auto-play)
+- Check audio notifications are enabled in extension settings
+- Try refreshing the page if notifications don't work initially
+- Verify browser supports Web Audio API (fallback will activate if not)
 
 **Performance Issues:**
 - Lower the post limit for auto-scroll

@@ -89,20 +89,20 @@
       transform: translateX(26px);
     }
 
-    .threshold-container {
+    .threshold-container, .limit-container {
       background: rgba(255, 255, 255, 0.1);
       padding: 15px;
       border-radius: 8px;
       margin-bottom: 15px;
     }
 
-    .threshold-label {
+    .threshold-label, .limit-label {
       font-size: 14px;
       margin-bottom: 8px;
       display: block;
     }
 
-    .threshold-input {
+    .threshold-input, .limit-input {
       width: 100%;
       padding: 8px;
       border: none;
@@ -129,6 +129,99 @@
       margin-bottom: 0;
     }
 
+    .audio-section {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .audio-section h3 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .audio-player {
+      width: 100%;
+      margin-top: 10px;
+      border-radius: 4px;
+    }
+
+    .audio-status {
+      font-size: 12px;
+      margin-top: 8px;
+      opacity: 0.9;
+    }
+
+    .audio-history-list {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 4px;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .audio-history-item {
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .audio-history-item:last-child {
+      border-bottom: none;
+    }
+
+    .audio-history-info {
+      flex: 1;
+      margin-right: 8px;
+    }
+
+    .audio-history-date {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .audio-history-posts {
+      opacity: 0.8;
+      font-size: 11px;
+    }
+
+    .audio-history-controls {
+      display: flex;
+      gap: 5px;
+    }
+
+    .btn-audio-small {
+      padding: 4px 8px;
+      font-size: 11px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      transition: background-color 0.2s;
+    }
+
+    .btn-audio-small:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .btn-audio-small.play {
+      background: linear-gradient(45deg, #4CAF50, #45a049);
+    }
+
+    .btn-audio-small.download {
+      background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+
+    .btn-audio-small.delete {
+      background: linear-gradient(45deg, #f44336, #d32f2f);
+    }
+
     .actions {
       display: flex;
       gap: 10px;
@@ -145,6 +238,7 @@
       text-decoration: none;
       text-align: center;
       transition: background-color 0.2s;
+      position: relative;
     }
 
     .btn-primary {
@@ -166,11 +260,40 @@
       background: rgba(255, 255, 255, 0.2);
     }
 
+    .btn-audio {
+      background: linear-gradient(45deg, #4CAF50, #45a049);
+      color: white;
+    }
+
+    .btn-audio:hover {
+      background: linear-gradient(45deg, #45a049, #3d8b40);
+    }
+
+    .counter-pill {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #ff6b6b;
+      color: white;
+      border-radius: 12px;
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: bold;
+      min-width: 20px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
     .status {
       text-align: center;
       font-size: 12px;
       opacity: 0.8;
       margin-top: 10px;
+    }
+
+    .disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
   </style>
 </head>
@@ -199,6 +322,15 @@
       <small>Posts below this score will be hidden</small>
     </div>
 
+    <div class="limit-container">
+      <label class="limit-label" for="limitInput">
+        Auto Scroll Post Limit: <span id="limitValue">50</span>
+      </label>
+      <input type="range" id="limitInput" class="limit-input" 
+             min="10" max="200" value="50" step="10">
+      <small>Stop auto-scroll after this many posts</small>
+    </div>
+
     <div class="toggle-container">
       <div>Auto-Scroll Feed</div>
       <label class="toggle-switch">
@@ -224,10 +356,31 @@
       </div>
     </div>
 
+    <div class="audio-section">
+      <h3>🎧 AI News Summary</h3>
+      <button id="generateAudioBtn" class="btn btn-audio" style="width: 100%; margin-bottom: 10px;">
+        🎧 Generate Audio Summary
+      </button>
+      <audio id="audioPlayer" class="audio-player" controls style="display: none;">
+        Your browser does not support the audio element.
+      </audio>
+      <div id="audioStatus" class="audio-status" style="display: none;">
+        Ready to generate audio summary
+      </div>
+      
+      <!-- Audio Summary History -->
+      <div id="audioHistorySection" class="audio-history" style="display: none; margin-top: 15px;">
+        <h4 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9);">📚 Previous Summaries</h4>
+        <div id="audioHistoryList" class="audio-history-list"></div>
+      </div>
+    </div>
+
     <div class="actions">
       <button id="optionsBtn" class="btn btn-primary">⚙️ Options</button>
-      <button id="exportBtn" class="btn btn-secondary">📄 Export Report</button>
-      <button id="debugBtn" class="btn btn-secondary">🔍 Debug Viewer</button>
+      <button id="exportBtn" class="btn btn-secondary" style="position: relative;">
+        📄 Export Report
+        <span id="postCountPill" class="counter-pill" style="display: none;">0</span>
+      </button>
     </div>
 
     <div class="status" id="apiStatus">

@@ -8,6 +8,7 @@ class LinkedInFeedCurator {
     console.log('🧠 LinkedIn Feed Curator: Starting initialization...');
     this.isEnabled = true;
     this.threshold = 25;
+    this.postLimit = 50;
     this.processedPosts = new Set();
     this.hiddenPostsCount = 0;
     this.visiblePosts = []; // Track posts that passed the filter
@@ -16,21 +17,24 @@ class LinkedInFeedCurator {
     this.autoScrollInterval = null;
     this.isProcessing = false;
     this.lastScrollPosition = 0;
+    this.limitReached = false;
     this.init();
   }
 
   async init() {
     console.log('🧠 LinkedIn Feed Curator: Initializing...');
     // Check if extension is enabled and get settings
-    const result = await chrome.storage.sync.get(['enabled', 'threshold', 'autoScroll']);
+    const result = await chrome.storage.sync.get(['enabled', 'threshold', 'autoScroll', 'postLimit']);
     this.isEnabled = result.enabled !== false; // Default to true
     this.threshold = result.threshold || 25;
+    this.postLimit = result.postLimit || 50;
     this.autoScrollEnabled = result.autoScroll || false;
     
     console.log('🧠 Settings loaded:', { 
       enabled: this.isEnabled, 
       threshold: this.threshold, 
-      autoScroll: this.autoScrollEnabled 
+      autoScroll: this.autoScrollEnabled,
+      postLimit: this.postLimit
     });
 
     if (this.isEnabled) {
@@ -68,14 +72,43 @@ class LinkedInFeedCurator {
         this.reprocessWithNewThreshold();
       }
 
+      if (changes.postLimit) {
+        this.postLimit = changes.postLimit.newValue;
+        this.limitReached = false; // Reset limit when it changes
+        this.updateControlPanel();
+      }
+
       if (changes.autoScroll) {
         this.autoScrollEnabled = changes.autoScroll.newValue;
-        if (this.autoScrollEnabled) {
+        if (this.autoScrollEnabled && !this.limitReached) {
           this.startAutoScroll();
         } else {
           this.stopAutoScroll();
         }
       }
+    });
+
+    // Listen for messages from options/popup
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+      if (request.action === 'exportMarkdown') {
+        const markdown = this.generateMarkdownReport();
+        sendResponse({ success: true, markdown: markdown });
+      } else if (request.action === 'getFilteredPostsData') {
+        sendResponse({ 
+          success: true, 
+          posts: this.visiblePosts.map(post => ({
+            content: post.content,
+            authorName: post.authorName,
+            authorTitle: post.authorTitle,
+            likes: post.likes,
+            comments: post.comments,
+            shares: post.shares,
+            url: post.url || window.location.href,
+            timestamp: post.timestamp || new Date().toISOString()
+          }))
+        });
+      }
+      return true;
     });
   }
 
@@ -179,12 +212,15 @@ class LinkedInFeedCurator {
   }
 
   startAutoScroll() {
-    if (this.autoScrollInterval) return;
+    if (this.autoScrollInterval || this.limitReached) return;
 
     console.log('🧠 🔄 Starting auto-scroll...');
     this.autoScrollInterval = setInterval(() => {
-      if (this.isProcessing) {
-        console.log('🧠 ⏳ Still processing posts, skipping scroll...');
+      if (this.isProcessing || this.limitReached) {
+        if (this.limitReached) {
+          this.stopAutoScroll();
+        }
+        console.log('🧠 ⏳ Still processing posts or limit reached, skipping scroll...');
         return;
       }
 
@@ -257,52 +293,36 @@ class LinkedInFeedCurator {
     const now = new Date();
     const dateStr = now.toLocaleDateString();
     const timeStr = now.toLocaleTimeString();
-
-    let markdown = `# LinkedIn Feed Curator - Filtered Posts Report
-
-**Generated:** ${dateStr} at ${timeStr}  
-**Total Filtered Posts:** ${this.visiblePosts.length}  
-**Quality Threshold:** ${this.threshold}/50  
-**Hidden Posts:** ${this.hiddenPostsCount}
-
----
-
-`;
-
-    // Sort posts by score (highest first)
-    const sortedPosts = [...this.visiblePosts].sort((a, b) => b.score - a.score);
-
-    sortedPosts.forEach((post, index) => {
-      const scoreEmoji = post.score >= 40 ? '🔥' : post.score >= 30 ? '✅' : '⚡';
-      
-      markdown += `## ${index + 1}. ${scoreEmoji} Post by ${post.authorName || 'Unknown Author'} (Score: ${post.score}/50)
-
-**Author:** ${post.authorName || 'Unknown'}  
-**Title:** ${post.authorTitle || 'Not specified'}  
-**Engagement:** ${post.likes || 0} likes, ${post.comments || 0} comments, ${post.shares || 0} shares  
-**Has Media:** ${post.hasMedia ? 'Yes' : 'No'}  
-**Content Length:** ${post.postLength || 0} characters  
-
-### Content:
-${post.content || 'No content extracted'}
-
----
-
-`;
+    
+    let report = `# LinkedIn Feed Curator Report\n\n`;
+    report += `**Generated:** ${dateStr} at ${timeStr}\n`;
+    report += `**Total Filtered Posts:** ${this.visiblePosts.length}\n`;
+    report += `**Quality Threshold:** ${this.threshold}/50\n`;
+    report += `**Posts Hidden:** ${this.hiddenPostsCount}\n\n`;
+    
+    if (this.visiblePosts.length === 0) {
+      report += `No posts met your quality criteria yet. Try lowering your threshold or processing more content.\n`;
+      return report;
+    }
+    
+    report += `## High-Quality Posts (${this.visiblePosts.length} posts)\n\n`;
+    
+    this.visiblePosts.forEach((post, index) => {
+      const score = post.score || 'N/A';
+      report += `### ${index + 1}. ${post.authorName || 'Unknown Author'}\n`;
+      if (post.authorTitle) {
+        report += `**Title:** ${post.authorTitle}\n`;
+      }
+      report += `**Quality Score:** ${score}/50\n`;
+      if (post.likes || post.comments || post.shares) {
+        report += `**Engagement:** ${post.likes || 0} likes, ${post.comments || 0} comments, ${post.shares || 0} shares\n`;
+      }
+      report += `\n${post.content}\n\n`;
+      report += `---\n\n`;
     });
-
-    markdown += `
-## Statistics
-
-- **Excellent Posts (40-50):** ${sortedPosts.filter(p => p.score >= 40).length}
-- **Good Posts (30-39):** ${sortedPosts.filter(p => p.score >= 30 && p.score < 40).length}
-- **Average Posts (20-29):** ${sortedPosts.filter(p => p.score >= 20 && p.score < 30).length}
-- **Below Average Posts (${this.threshold}-19):** ${sortedPosts.filter(p => p.score >= this.threshold && p.score < 20).length}
-
-**Report generated by LinkedIn Feed Curator Chrome Extension**
-`;
-
-    return markdown;
+    
+    report += `\n*This report was generated by LinkedIn Feed Curator extension.*`;
+    return report;
   }
 
   async reprocessWithNewThreshold() {
@@ -424,6 +444,7 @@ ${post.content || 'No content extracted'}
     }
     
     console.log(`🧠 ✅ PROCESSING COMPLETE: ${processedCount} new posts analyzed, ${skippedCount} skipped (already processed)`);
+    this.checkPostLimit();
   }
 
   getPostId(post) {
@@ -485,12 +506,16 @@ ${post.content || 'No content extracted'}
         return;
       }
 
+      // Update total processed count
+      await this.updateTotalProcessedStats();
+
       const score = await this.getPostQualityScore(postData);
       console.log(`🧠 🎯 Post scored: ${score}/50 (threshold: ${this.threshold})`);
 
       if (score < this.threshold) {
         console.log(`🧠 ❌ HIDING POST: Score ${score} < threshold ${this.threshold}`);
         this.hidePost(postElement, score);
+        await this.updateDailyHiddenStats();
       } else {
         console.log(`🧠 ✅ KEEPING POST: Score ${score} >= threshold ${this.threshold}`);
         
@@ -511,6 +536,9 @@ ${post.content || 'No content extracted'}
         
         // Update control panel counts
         this.updateControlPanel();
+        
+        // Update badge with visible posts count
+        this.updateBadge();
       }
     } catch (error) {
       console.error('🧠 💥 Error analyzing post:', error);
@@ -920,10 +948,53 @@ ${post.content || 'No content extracted'}
     this.updateBadge();
   }
 
+  async updateDailyHiddenStats() {
+    try {
+      const today = new Date().toDateString();
+      const result = await chrome.storage.local.get(['daily_stats']);
+      const dailyStats = result.daily_stats || {};
+      
+      if (!dailyStats[today]) {
+        dailyStats[today] = { hidden: 0, processed: 0 };
+      }
+      
+      dailyStats[today].hidden++;
+      await chrome.storage.local.set({ daily_stats: dailyStats });
+      
+      console.log(`📊 Updated daily hidden stats: ${dailyStats[today].hidden} hidden today`);
+    } catch (error) {
+      console.error('Error updating daily hidden stats:', error);
+    }
+  }
+
+  async updateTotalProcessedStats() {
+    try {
+      const today = new Date().toDateString();
+      const result = await chrome.storage.local.get(['daily_stats', 'total_processed']);
+      const dailyStats = result.daily_stats || {};
+      const totalProcessed = (result.total_processed || 0) + 1;
+      
+      if (!dailyStats[today]) {
+        dailyStats[today] = { hidden: 0, processed: 0 };
+      }
+      
+      dailyStats[today].processed++;
+      
+      await chrome.storage.local.set({ 
+        daily_stats: dailyStats,
+        total_processed: totalProcessed
+      });
+      
+      console.log(`📊 Updated processed stats: ${dailyStats[today].processed} processed today, ${totalProcessed} total`);
+    } catch (error) {
+      console.error('Error updating processed stats:', error);
+    }
+  }
+
   updateBadge() {
     chrome.runtime.sendMessage({
       action: 'updateBadge',
-      count: this.hiddenPostsCount
+      count: this.visiblePosts.length
     });
   }
 
@@ -935,6 +1006,188 @@ ${post.content || 'No content extracted'}
   removeAllHiddenPostIndicators() {
     const hiddenIndicators = document.querySelectorAll('.li-curator-hidden-post');
     hiddenIndicators.forEach(indicator => indicator.remove());
+  }
+
+  checkPostLimit() {
+    if (this.visiblePosts.length >= this.postLimit && !this.limitReached) {
+      this.limitReached = true;
+      this.stopAutoScroll();
+      this.showPostLimitNotification();
+      console.log(`🧠 Post limit reached: ${this.visiblePosts.length}/${this.postLimit}`);
+    }
+  }
+
+  showPostLimitNotification() {
+    // Play soft audio notification first
+    this.playCompletionAudioNotification();
+    
+    // Create notification overlay
+    const notification = document.createElement('div');
+    notification.id = 'li-curator-limit-notification';
+    notification.innerHTML = `
+      <div style="
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(135deg, #0073b1 0%, #005885 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        max-width: 420px;
+        z-index: 10000;
+        animation: slideInScale 0.3s ease-out;
+      ">
+        <div style="font-size: 48px; margin-bottom: 16px;">🎯</div>
+        <h2 style="margin: 0 0 16px 0; font-size: 24px; font-weight: 600;">
+          Target Reached!
+        </h2>
+        <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.5; opacity: 0.9;">
+          Successfully collected <strong>${this.visiblePosts.length}</strong> high-quality posts<br>
+          Auto-scroll has been paused
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+          <button id="continue-scrolling" style="
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+          ">Continue Scrolling</button>
+          <button id="view-posts" style="
+            background: rgba(255, 255, 255, 0.9);
+            color: #0073b1;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+          ">View Posts</button>
+          <button id="close-notification" style="
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+          ">Close</button>
+        </div>
+      </div>
+      <div style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+      "></div>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Add event listeners
+    document.getElementById('continue-scrolling').addEventListener('click', () => {
+      this.limitReached = false;
+      this.startAutoScroll();
+      notification.remove();
+    });
+
+    document.getElementById('view-posts').addEventListener('click', () => {
+      this.exportFilteredPosts();
+      notification.remove();
+    });
+
+    document.getElementById('close-notification').addEventListener('click', () => {
+      notification.remove();
+    });
+
+    // Auto-close after 10 seconds
+    setTimeout(() => {
+      if (document.getElementById('li-curator-limit-notification')) {
+        notification.remove();
+      }
+    }, 10000);
+  }
+
+  async playCompletionAudioNotification() {
+    try {
+      // Check if audio notifications are enabled
+      const result = await chrome.storage.sync.get(['audioNotifications']);
+      const audioEnabled = result.audioNotifications !== false; // Default to true
+      
+      if (!audioEnabled) {
+        console.log('🧠 🔇 Audio notifications disabled by user');
+        return;
+      }
+
+      // Create a soft, pleasant notification sound using Web Audio API
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      
+      // Create a sequence of gentle tones for a pleasant notification
+      const frequencies = [523.25, 659.25, 783.99]; // C5, E5, G5 - major chord
+      const duration = 0.15; // Each tone duration in seconds
+      const gap = 0.05; // Gap between tones
+      
+      frequencies.forEach((frequency, index) => {
+        setTimeout(() => {
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          // Soft sine wave for pleasant sound
+          oscillator.type = 'sine';
+          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+          
+          // Gentle volume envelope
+          const now = audioContext.currentTime;
+          gainNode.gain.setValueAtTime(0, now);
+          gainNode.gain.linearRampToValueAtTime(0.08, now + 0.02); // Soft attack
+          gainNode.gain.linearRampToValueAtTime(0.06, now + duration * 0.7); // Sustain
+          gainNode.gain.linearRampToValueAtTime(0, now + duration); // Gentle release
+          
+          oscillator.start(now);
+          oscillator.stop(now + duration);
+        }, index * (duration + gap) * 1000);
+      });
+      
+      console.log('🧠 🎵 Played completion audio notification');
+      
+    } catch (error) {
+      console.log('🧠 Audio notification not available:', error.message);
+      // Fallback: create a simple beep with oscillator if Web Audio API partially works
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        
+        const now = audioContext.currentTime;
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.1, now + 0.01);
+        gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
+        
+        oscillator.start(now);
+        oscillator.stop(now + 0.2);
+        
+        console.log('🧠 🎵 Played fallback audio notification');
+      } catch (fallbackError) {
+        console.log('🧠 Silent mode - audio notification disabled');
+      }
+    }
   }
 }
 

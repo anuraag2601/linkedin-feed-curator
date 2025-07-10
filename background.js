@@ -214,6 +214,144 @@ Reply with ONLY the numerical score (1-50). Example: 35`;
       return 'Error exporting debug log';
     }
   }
+
+  // Method to generate audio summary
+  async generateAudioSummary(filteredPosts, elevenLabsApiKey) {
+    if (!this.ANTHROPIC_API_KEY) {
+      throw new Error('Anthropic API key not configured');
+    }
+
+    try {
+      console.log('🧠 Background: Generating text summary for', filteredPosts.length, 'posts');
+      
+      // Generate newsreader-style summary text using Claude 4
+      const summaryText = await this.generateSummaryText(filteredPosts);
+      console.log('🧠 Background: Summary text generated, length:', summaryText.length);
+
+      // Convert text to speech if ElevenLabs API key is provided
+      if (elevenLabsApiKey && elevenLabsApiKey.trim()) {
+        console.log('🧠 Background: Converting text to speech...');
+        const base64Audio = await this.convertTextToSpeech(summaryText, elevenLabsApiKey);
+        return {
+          success: true,
+          summaryText: summaryText,
+          audioBase64: base64Audio
+        };
+      } else {
+        console.log('🧠 Background: No ElevenLabs API key provided, returning text only');
+        return {
+          success: true,
+          summaryText: summaryText,
+          audioBase64: null
+        };
+      }
+    } catch (error) {
+      console.error('🧠 Background: Error generating audio summary:', error);
+      throw error;
+    }
+  }
+
+  // Generate newsreader-style summary text using Claude 4
+  async generateSummaryText(filteredPosts) {
+    const postsText = filteredPosts.map((post, index) => {
+      return `Post ${index + 1}:
+Author: ${post.authorName} (${post.authorTitle})
+Content: ${post.content}
+Engagement: ${post.likes} likes, ${post.comments} comments, ${post.shares} shares
+${post.hasMedia ? 'Includes media content' : ''}
+---`;
+    }).join('\n\n');
+
+    const prompt = `You are a professional news presenter creating a concise, engaging summary of LinkedIn posts for audio consumption. 
+
+Here are ${filteredPosts.length} high-quality LinkedIn posts that have been curated and filtered:
+
+${postsText}
+
+Create a newsreader-style summary that:
+- Starts with a brief overview of the key themes and trends
+- Highlights the most valuable insights and professional perspectives
+- Groups related content together logically
+- Uses conversational, flowing language suitable for audio
+- Keeps each post summary to 1-2 sentences maximum
+- Ends with a brief conclusion about overall themes
+- Aim for 2-3 minutes of speaking time (roughly 300-450 words)
+
+Write in a professional but accessible tone, as if you're presenting the morning business news. Use transition phrases like "Meanwhile," "In related news," "Another interesting perspective comes from..." to create smooth flow.
+
+Do not include any formatting, just pure text ready for text-to-speech conversion.`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': this.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 800,
+        messages: [{
+          role: 'user',
+          content: prompt
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Claude API request failed: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    return data.content[0].text.trim();
+  }
+
+  // Convert text to speech using ElevenLabs API
+  async convertTextToSpeech(text, apiKey) {
+    const VOICE_ID = 'pNInz6obpgDQGcFmaJgB'; // Adam voice - professional male voice
+    const XI_API_URL = `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`;
+
+    const response = await fetch(XI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Accept': 'audio/mpeg',
+        'Content-Type': 'application/json',
+        'xi-api-key': apiKey
+      },
+      body: JSON.stringify({
+        text: text,
+        model_id: 'eleven_monolingual_v1',
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.75,
+          style: 0.0,
+          use_speaker_boost: true
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`ElevenLabs API request failed: ${response.status} - ${errorText}`);
+    }
+
+    // Convert response to array buffer, then to base64 using a safe method
+    const audioBuffer = await response.arrayBuffer();
+    const uint8Array = new Uint8Array(audioBuffer);
+    
+    // Convert to base64 in chunks to avoid stack overflow
+    let binaryString = '';
+    const chunkSize = 8192; // Process in 8KB chunks
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.slice(i, i + chunkSize);
+      binaryString += String.fromCharCode.apply(null, chunk);
+    }
+    
+    const base64Audio = btoa(binaryString);
+    return base64Audio;
+  }
 }
 
 const analyzer = new PostAnalyzer();
@@ -246,6 +384,44 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         console.error('🧠 Background: API test failed:', error);
         sendResponse({ success: false, error: error.message });
       });
+    return true; // Will respond asynchronously
+  }
+  
+  if (request.action === 'generateAudioSummary') {
+    console.log('🧠 Background: Generating audio summary for', request.posts.length, 'posts');
+    analyzer.generateAudioSummary(request.posts, request.elevenLabsApiKey)
+      .then(result => {
+        console.log('🧠 Background: Audio summary generated successfully');
+        sendResponse(result);
+      })
+      .catch(error => {
+        console.error('🧠 Background: Audio summary generation failed:', error);
+        sendResponse({ 
+          success: false, 
+          error: error.message || 'Failed to generate audio summary'
+        });
+      });
+    return true; // Will respond asynchronously
+  }
+  
+  if (request.action === 'getFilteredPostsData') {
+    console.log('🧠 Background: Requesting filtered posts from content script...');
+    // Forward the request to the active tab's content script
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]) {
+        chrome.tabs.sendMessage(tabs[0].id, { action: 'getFilteredPostsData' }, (response) => {
+          if (chrome.runtime.lastError) {
+            console.error('🧠 Background: Error getting filtered posts:', chrome.runtime.lastError);
+            sendResponse({ success: false, error: 'Failed to get filtered posts from content script' });
+          } else {
+            console.log('🧠 Background: Received', response?.filteredPosts?.length || 0, 'filtered posts');
+            sendResponse(response);
+          }
+        });
+      } else {
+        sendResponse({ success: false, error: 'No active tab found' });
+      }
+    });
     return true; // Will respond asynchronously
   }
   
@@ -299,7 +475,10 @@ chrome.runtime.onInstalled.addListener(async () => {
     threshold: 25,
     autoScroll: false,
     customFiltering: '',
-    apiKey: ''
+    apiKey: '',
+    postLimit: 50, // Added postLimit
+    elevenLabsApiKey: '', // Added elevenLabsApiKey
+    audioNotifications: true // Added audio notifications setting
   });
   
   // Open options page to set API key

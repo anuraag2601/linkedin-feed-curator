@@ -2,6 +2,51 @@
 
 All notable changes to the LinkedIn Feed Curator extension will be documented in this file.
 
+## [2.1.2] - 2024-07-10
+
+### 🔔 New Features
+- **Audio Completion Notifications**: Added gentle audio alerts when auto-scroll reaches target post limit
+  - Pleasant 3-tone musical sequence (C5-E5-G5 major chord) using Web Audio API
+  - Soft, non-intrusive volume levels (max 0.08) designed not to disturb workflow
+  - 0.15s duration per tone with 0.05s gaps for smooth musical progression
+  - User-controllable setting (enabled by default) in extension options
+  - Graceful fallback for limited Web Audio API support
+  - Console logging for debugging enabled/disabled states
+
+### 🔧 Technical Improvements
+- **Enhanced Auto-Scroll Completion**: Audio notification plays before modal appears
+- **Browser-Native Audio**: Uses Web Audio API for consistent cross-platform sound generation
+- **Error Handling**: Multiple fallback layers for audio generation failures
+- **Settings Integration**: Audio notifications preference stored in chrome.storage.sync
+- **Performance Optimized**: Minimal resource usage with efficient oscillator-based audio
+
+### 🎨 User Experience
+- **Non-Disruptive Alerts**: Know when feed processing is complete without actively monitoring
+- **Musical Harmony**: Pleasant major chord sequence instead of harsh beeping
+- **Instant Feedback**: Immediate audio confirmation when target posts are collected
+- **User Control**: Easy toggle in popup and options page for personal preference
+
+## [2.1.1] - 2024-07-10
+
+### 🐛 Bug Fixes
+- **Audio Control Buttons**: Fixed audio history play, download, and delete buttons not working due to onclick timing issues
+  - Replaced `onclick` attributes with proper event delegation using data attributes
+  - Functions now properly attach after DOM is loaded and ready
+- **Badge Counter**: Fixed extension badge to show count of filtered/visible posts instead of hidden posts
+  - Badge now displays the number of high-quality posts that passed the quality threshold
+  - Provides more useful information about content available for consumption
+- **Statistics Tracking**: Fixed "Posts Hidden Today" and "Total Processed" counters not updating correctly
+  - Added proper `updateDailyHiddenStats()` and `updateTotalProcessedStats()` functions
+  - Statistics now sync correctly with chrome.storage.local
+  - Daily and total counters update in real-time as posts are processed
+
+### 🔧 Technical Improvements
+- Improved event handling with event delegation pattern for audio controls
+- Enhanced statistics synchronization between content script and popup
+- Better separation of concerns for badge updates vs. statistics tracking
+
+## [2.1.0] - 2024-07-09
+
 ## [2.0.0] - 2025-01-14 - 🎧 Audio Summaries Major Update
 
 ### 🎧 Major New Features

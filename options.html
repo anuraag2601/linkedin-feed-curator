@@ -302,9 +302,31 @@
     </div>
 
     <div class="setting-group">
+      <label for="postLimit">Auto-Scroll Post Limit</label>
+      <div class="threshold-container">
+        <span>10</span>
+        <input type="range" id="postLimit" min="10" max="200" value="50" class="threshold-slider">
+        <span>200</span>
+        <div class="threshold-value" id="post-limit-value">50</div>
+      </div>
+      <small class="help-text">Auto-scroll will pause after collecting this many filtered posts. You'll get a notification when the limit is reached.</small>
+    </div>
+
+    <div class="setting-group">
       <label for="customFiltering">Custom Filtering Preferences (Optional)</label>
       <textarea id="customFiltering" placeholder="Example: Show me posts about AI companies, machine learning products, startup funding news, and software engineering careers. Avoid personal stories, food photos, and motivational quotes." rows="4"></textarea>
       <small class="help-text">Describe the types of content you want to see or avoid. Be specific! Examples: 'AI companies and tech startups', 'Marketing tips and growth strategies', 'Finance and investment advice'.</small>
+    </div>
+
+    <div class="setting-group">
+      <div class="api-key-section">
+        <label for="elevenLabsApiKey">ElevenLabs API Key (Optional)</label>
+        <input type="password" id="elevenLabsApiKey" placeholder="Enter your ElevenLabs API key">
+        <div class="help-text">
+          Get your API key from <a href="https://elevenlabs.io/app/settings/api-keys" target="_blank">ElevenLabs</a>. 
+          Required for generating audio summaries of your filtered posts in the popup. Your key is stored securely in your browser.
+        </div>
+      </div>
     </div>
 
     <div class="setting-group">
@@ -312,6 +334,15 @@
       <p class="help-text">Download a markdown report of all posts that passed your quality filter:</p>
       <button class="btn-secondary" id="exportMarkdownBtn">📄 Download Markdown Report</button>
       <div id="exportStatus" class="help-text" style="margin-top: 10px; display: none;"></div>
+    </div>
+
+    <div class="setting-group">
+      <h3>🔍 Debug & Analytics</h3>
+      <p class="help-text">View detailed analysis data and debug information for post filtering:</p>
+      <button class="btn-secondary" id="debugBtn">🔍 Open Debug Viewer</button>
+      <div class="help-text" style="margin-top: 10px;">
+        The debug viewer shows detailed scoring, reasoning, and analytics for how each post was analyzed by the AI.
+      </div>
     </div>
 
     <div class="button-group">
